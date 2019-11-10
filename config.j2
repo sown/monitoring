@@ -1,0 +1,13 @@
+{% for device in devices %}
+	{% if device.device_role and (device.device_role.name in ["Server", "Backup Server", "Router"]) %}
+	object Host "{{device.name}}" {
+		import "generic-host"
+		{% if device.primary_ip4 %}
+			address = "{{device.primary_ip4.address.split("/")[0]}}"
+		{% endif %}
+		{% if device.primary_ip6 %}
+			address6 = "{{device.primary_ip6.address.split("/")[0]}}"
+		{% endif %}
+	}
+	{% endif %}
+{% endfor %}
