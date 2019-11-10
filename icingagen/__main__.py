@@ -5,4 +5,7 @@ from icingagen import render, NETBOX_URL
 
 nb = Api(NETBOX_URL, ssl_verify=False)
 
-render(nb.dcim.devices.all())
+render(
+  devices=nb.dcim.devices.all(),
+  vms=nb.virtualization.virtual_machines.all(),
+)
