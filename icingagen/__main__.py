@@ -3,13 +3,14 @@ import logging
 
 from pynetbox.api import Api
 
-from .icinga import Icinga, IcingaReloadFailedException
 from .config import NETBOX_URL
-from .render import render
+from .icinga import Icinga, IcingaReloadFailedException
 from .logging import logger_setup
+from .render import render
 
 
 def main():
+    """Entrypoint."""
     logger_setup(__name__)
     LOGGER = logging.getLogger(__name__)
 
