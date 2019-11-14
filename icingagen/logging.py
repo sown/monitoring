@@ -10,7 +10,9 @@ def logger_setup(name) -> None:
 
     handler = logging.StreamHandler(sys.stderr)
 
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+    formatter = logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    )
     handler.setFormatter(formatter)
 
     root.addHandler(handler)
