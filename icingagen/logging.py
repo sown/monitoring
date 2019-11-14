@@ -3,9 +3,9 @@ import logging
 import sys
 
 
-def logger_setup() -> None:
+def logger_setup(name) -> None:
     """Setup the logger."""
-    root = logging.getLogger()
+    root = logging.getLogger(name)
     root.setLevel(logging.INFO)
 
     handler = logging.StreamHandler(sys.stderr)

@@ -10,4 +10,4 @@ def render(*, devices, vms):
     jinjaEnv = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath="./"))
     template = jinjaEnv.get_template(CONFIG_PATH)
 
-    print(template.render(devices=devices, vms=vms))
+    return template.render(devices=devices, vms=vms)
