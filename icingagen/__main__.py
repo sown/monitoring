@@ -1,9 +1,10 @@
 """Main file for config generator."""
 import logging
+import os
 
 from pynetbox.api import Api
 
-from .config import NETBOX_URL
+from .config import CONFIG_DIR, NETBOX_URL
 from .icinga import Icinga, IcingaReloadFailedException
 from .logging import logger_setup
 from .render import render
@@ -19,12 +20,24 @@ def main():
 
     LOGGER.info("Building configuration from netbox")
 
-    config = render(
-        devices=nb.dcim.devices.all(), vms=nb.virtualization.virtual_machines.all(),
-    )
+    config = {}
+
+    devices = nb.dcim.devices.all()
+    vms = nb.virtualization.virtual_machines.all()
+
+    for root, _, files in os.walk(CONFIG_DIR):
+        for name in files:
+            path = f"{root}/{name}"
+            relative = os.path.relpath(f"{root}/{name}", CONFIG_DIR)
+            LOGGER.debug(f"Found config file {path}")
+            if ".j2." in name:
+                config[relative] = render(devices=devices, vms=vms, template=path)
+            else:
+                with open(path, "r") as file:
+                    config[relative] = file.read()
 
     try:
-        icinga.update_config(hosts=config)
+        icinga.update_config(files=config)
         LOGGER.info("Icinga reloaded ok")
     except IcingaReloadFailedException:
         LOGGER.error("Icinga reload failed")

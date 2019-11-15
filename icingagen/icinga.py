@@ -42,14 +42,12 @@ class Icinga:
             headers={"Accept": accept},
         )
 
-    def _post_config(self, hosts) -> None:
+    def _post_config(self, files) -> None:
         """Post the config to Icinga."""
         r = self._post(
             endpoint="config/stages/sown",
             data={
-                "files": {
-                    "conf.d/hosts-sown.conf": hosts,
-                },
+                "files": files,
             },
         )
         self.stage = r.json()["results"][0]["stage"]
@@ -73,9 +71,9 @@ class Icinga:
             accept="application/octet-stream",
         ).text
 
-    def update_config(self, *, hosts) -> None:
+    def update_config(self, *, files) -> None:
         """Update the config and check that it worked."""
-        self._post_config(hosts)
+        self._post_config(files)
 
         self._wait_reload()
 
