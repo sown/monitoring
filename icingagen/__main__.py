@@ -24,6 +24,14 @@ def main():
 
     devices = nb.dcim.devices.all()
     vms = nb.virtualization.virtual_machines.all()
+    ips = nb.ipam.ip_addresses.all()
+
+    for device in devices:
+        device.interfaces = {}
+        for ip in nb.ipam.ip_addresses.filter(device_id=device.id):
+            if ip.interface.name not in device.interfaces:
+                device.interfaces[ip.interface.name] = []
+            device.interfaces[ip.interface.name].append(ip)
 
     for root, _, files in os.walk(CONFIG_DIR):
         for name in files:
