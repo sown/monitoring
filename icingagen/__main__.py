@@ -27,14 +27,20 @@ def main():
 
     for root, _, files in os.walk(CONFIG_DIR):
         for name in files:
-            path = f"{root}/{name}"
-            relative = os.path.relpath(f"{root}/{name}", CONFIG_DIR)
-            LOGGER.debug(f"Found config file {path}")
-            if ".j2." in name:
-                config[relative] = render(devices=devices, vms=vms, template=path)
-            else:
-                with open(path, "r") as file:
-                    config[relative] = file.read()
+            if name.endswith(".conf"):
+                path = f"{root}/{name}"
+                relative = os.path.relpath(f"{root}/{name}", CONFIG_DIR)
+                LOGGER.debug(f"Found config file {path}")
+                if ".j2." in name:
+                    config[relative] = render(
+                        devices=devices,
+                        vms=vms,
+                        ips=ips,
+                        template=path,
+                    )
+                else:
+                    with open(path, "r") as file:
+                        config[relative] = file.read()
 
     try:
         icinga.update_config(files=config)
