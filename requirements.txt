@@ -1,3 +1,0 @@
-pynetbox
-jinja2
-requests
