@@ -24,7 +24,6 @@ def main():
 
     devices = nb.dcim.devices.all()
     vms = nb.virtualization.virtual_machines.all()
-    ips = nb.ipam.ip_addresses.all()
 
     for device in devices:
         device.interfaces = {}
@@ -43,7 +42,6 @@ def main():
                     config[relative] = render(
                         devices=devices,
                         vms=vms,
-                        ips=ips,
                         template=path,
                     )
                 else:
