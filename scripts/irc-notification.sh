@@ -30,4 +30,4 @@ else
 	alert="$HOSTNAME/$SERVICENAME"
 fi
 
-echo -e "[i2] $prefix$colouredtype - $alert $colouredstate$suffix" | telnet bot.sown.org.uk 4444
+echo -e "[i2] $prefix$colouredtype - $alert $middle$colouredstate$suffix" | telnet bot.sown.org.uk 4444
