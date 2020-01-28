@@ -12,7 +12,7 @@ from .render import render
 
 def main():
     """Entrypoint."""
-    logger_setup(__name__)
+    logger_setup()
     LOGGER = logging.getLogger(__name__)
 
     nb = Api(NETBOX_URL, ssl_verify=False)

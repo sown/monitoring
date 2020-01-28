@@ -5,9 +5,7 @@ import time
 import requests
 
 from .config import ICINGA_CA, ICINGA_PASS, ICINGA_URL, ICINGA_USER
-from .logging import logger_setup
 
-logger_setup(__name__)
 LOGGER = logging.getLogger(__name__)
 
 
