@@ -22,8 +22,8 @@ def main():
 
     config = {}
 
-    devices = nb.dcim.devices.all()
-    vms = nb.virtualization.virtual_machines.all()
+    devices = nb.dcim.devices.filter(status="active")
+    vms = nb.virtualization.virtual_machines.filter(status="active")
 
     for device in devices:
         device.interfaces = {}
