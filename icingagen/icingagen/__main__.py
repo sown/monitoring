@@ -48,12 +48,17 @@ def main():
                     with open(path, "r") as file:
                         config[relative] = file.read()
 
-    try:
-        icinga.update_config(files=config)
-        LOGGER.info("Icinga reloaded ok")
-    except IcingaReloadFailedException:
-        LOGGER.error("Icinga reload failed")
-        LOGGER.error("Icinga logs:\n" + icinga.log())
+    diff = icinga.get_diff(config)
+    if diff:
+        LOGGER.warning(f"Changes made:\n{diff}")
+        try:
+            icinga.update_config(files=config)
+            LOGGER.info("Icinga reloaded ok")
+        except IcingaReloadFailedException:
+            LOGGER.error("Icinga reload failed")
+            LOGGER.error("Icinga logs:\n" + icinga.log())
+    else:
+        LOGGER.info("No change to config")
 
 
 if __name__ == "__main__":
