@@ -24,6 +24,7 @@ def main():
 
     devices = nb.dcim.devices.filter(status="active")
     vms = nb.virtualization.virtual_machines.filter(status="active")
+    racks = nb.dcim.racks.all()
 
     for device in devices:
         device.interfaces = {}
@@ -42,6 +43,7 @@ def main():
                     config[relative] = render(
                         devices=devices,
                         vms=vms,
+                        racks=racks,
                         template=path,
                     )
                 else:
