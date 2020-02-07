@@ -2,18 +2,35 @@
 import logging
 import os
 
+import click
 from pynetbox.api import Api
 
 from .config import CONFIG_DIR, NETBOX_URL
 from .icinga import Icinga, IcingaReloadFailedException
-from .logging import logger_setup
+from .logconfig import logger_setup
 from .render import render
 
+LOGGER = logging.getLogger(__name__)
 
-def main():
-    """Entrypoint."""
-    logger_setup()
-    LOGGER = logging.getLogger(__name__)
+
+@click.command()
+@click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Generate configuration and display diff but don't apply",
+)
+@click.option(
+    "-q",
+    "--quiet",
+    is_flag=True,
+    default=False,
+    help="Only output configuration changes or errors",
+)
+def cli(dry_run: bool, quiet: bool):
+    """Generate a new Icinga configuration."""
+    logger_setup(quiet)
 
     nb = Api(NETBOX_URL, ssl_verify=False)
     icinga = Icinga()
@@ -52,16 +69,13 @@ def main():
 
     diff = icinga.get_diff(config)
     if diff:
-        LOGGER.warning(f"Changes made:\n{diff}")
-        try:
-            icinga.update_config(files=config)
-            LOGGER.info("Icinga reloaded ok")
-        except IcingaReloadFailedException:
-            LOGGER.error("Icinga reload failed")
-            LOGGER.error("Icinga logs:\n" + icinga.log())
+        LOGGER.warning(f"Changes:\n{diff}")
+        if not dry_run:
+            try:
+                icinga.update_config(files=config)
+                LOGGER.info("Icinga reloaded ok")
+            except IcingaReloadFailedException:
+                LOGGER.error("Icinga reload failed")
+                LOGGER.error("Icinga logs:\n" + icinga.log())
     else:
         LOGGER.info("No change to config")
-
-
-if __name__ == "__main__":
-    main()

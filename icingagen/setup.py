@@ -13,6 +13,7 @@ setup(
         "pynetbox",
         "jinja2",
         "requests",
+        "click",
     ],
     extras_require={
         "dev": [
@@ -28,7 +29,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "icingagen=icingagen.__main__:main",
+            "icingagen=icingagen.cli:cli",
         ],
     },
 )
