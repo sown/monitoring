@@ -1,0 +1,9 @@
+#!/bin/bash
+MESSAGES=`cat /var/mail/* | grep Delivered-To | wc -l`
+SIZE=`du -sh /var/mail | awk 'BEGIN { FS = "[\t]+" } ; { print $1 }'`
+EXIT=0
+if [ $MESSAGES -gt 1 ]
+then EXIT=1
+fi
+echo Number of messages = $MESSAGES of size $SIZE
+exit $EXIT;

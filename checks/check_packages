@@ -1,0 +1,40 @@
+#!/bin/bash
+while getopts c:w: option
+do
+        case "${option}"
+        in
+                c) CRIT=${OPTARG};;
+                w) WARN=${OPTARG};;
+        esac
+done
+if [ -f /usr/lib/update-notifier/apt-check ]; then
+        result=`/usr/lib/update-notifier/apt-check --human-readable`
+        packages=`echo "$result" | head -n 1 | awk 'BEGIN{FS="[\t ]+"}{print $1}'`
+        critpackages=`echo "$result" | tail -n 1 | awk 'BEGIN{FS="[\t ]+"}{print $1}'`
+        grep security /etc/apt/sources.list > /tmp/security.list
+        critpkglist=`apt-get dist-upgrade -o Dir::Etc::SourceList=/tmp/security.list -s | grep "^\(Inst\|Remv\)" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
+else
+        result=`/usr/lib/nagios/plugins/check_apt -d`
+        packages=`echo $result | awk 'BEGIN{FS="[\t :()]+"}{print $3}'`
+        critpackages=`echo $result | awk 'BEGIN{FS="[\t :()]+"}{print $8}'`
+        critpkglist=`/usr/lib/nagios/plugins/check_apt -d -v | grep "^\*\*" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
+fi
+regex='^[0-9]+$'
+if ! [[ $critpackages =~ $regex ]] ; then
+        echo "APT CRITICAL: Invalid number of package upgrades reported"
+        exit 2;
+elif [ $critpackages -gt 0 ]; then
+        echo "APT CRITICAL: ${packages} packages available for upgrade (${critpackages} critical updates: ${critpkglist})"
+        exit 2;
+else
+        if [[ -n "${CRIT}" && ${packages} -ge ${CRIT} ]]; then
+                echo "APT CRITICAL: ${packages} packages available for upgrade (${critpackages} critical updates)"
+                exit 2;
+        elif [[ -n "${WARN}" && ${packages} -ge ${WARN} ]]; then
+                echo "APT WARNING: ${packages} packages available for upgrade (${critpackages} critical updates)"
+                exit 1;
+        else
+                echo "APT OK: ${packages} packages available for upgrade (${critpackages} critical updates)"
+                exit 0;
+        fi
+fi

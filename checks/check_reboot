@@ -1,0 +1,16 @@
+#!/bin/bash
+#This is a quick check to see if system needs rebooting due to package upgrade.
+#Returns nagios ok if no reboot required, critcial if reboot is required.
+if [ -f /var/run/reboot-required ]; then
+        echo 'REBOOT check CRITICAL'
+        echo "Package upgrades require reboot"
+        exit 2;
+elif [ -s /var/lib/update-notifier/fsck-at-reboot ]; then
+        echo 'REBOOT check WARNING'
+        echo "A disk needs fscking on next reboot"
+        exit 1;
+else
+        echo "REBOOT check OK"
+        exit 0;
+fi
+

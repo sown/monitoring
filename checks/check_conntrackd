@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Check de nagios para monitorizar el numero de conexiones establecidas 
+# nablas@gmail.com
+#
+# Version history
+#
+# 0.1:  First release
+# 0.2:  The path /proc/sys/net/ipv4/netfilter/ip_conntrack_count may be 
+#	differtent in each distribution, so now the script search for it.
+#        
+
+
+
+# Ayuda ##############################################
+if [ $# != 2 ]; then
+	echo "Syntax: check_conntrack <warn percent> <crit percent>"
+	echo 
+	echo "Example: check_conntrack 75 90"
+	exit -1
+fi
+
+
+# Busqueda de archivos ###############################
+COUNT_EXE=`which conntrackd`
+MAX_FILE="/etc/conntrackd/conntrackd.conf"
+if [ -z $MAX_FILE ] || [ -z $COUNT_EXE ]; then
+	echo "CRITICAL - ERROR: Files needed to determine max and/or count of connections could not be found"
+	exit 2
+fi
+
+# Calculo de valores #################################
+MAX=`cat $MAX_FILE | grep HashLimit | awk '{$1=$1;print}' | awk  -F ' ' '{print $2}'`
+COUNT=`/usr/bin/sudo $COUNT_EXE -s | grep "current active connections:" | sed "s/current active connections://" | awk 'BEGIN{FS="[\t ]+"}{print $2}' | head -n 1`
+WARN=`expr $MAX \* $1 \/ 100`
+CRIT=`expr $MAX \* $2 \/ 100`
+
+if [ -z $MAX ] || [ -z $COUNT ]; then
+        echo "CRITICAL - ERROR - count or maximum connections could not be determined"
+        exit 2
+fi
+
+# Evaluacion #########################################
+if [ `expr $COUNT \< $WARN` == `expr $COUNT \> 0` ]; then
+        echo "OK - $COUNT |connections=$COUNT;$WARN;$CRIT;0;$MAX"
+        exit 0
+fi
+
+if [ `expr $COUNT \< $CRIT` == `expr $COUNT \> $WARN`  ]; then
+        echo "WARNING - $COUNT |connections=$COUNT;$WARN;$CRIT;0;$MAX"
+        exit 1
+fi
+
+if [ `expr $COUNT \> $CRIT` ]; then
+        echo "CRITICAL - $COUNT |connnections=$COUNT;$WARN;$CRIT;0;$MAX"
+        exit 2
+fi
+
+echo "CRITICAL - ERROR number of connections could not be determined"
+exit -1
+
