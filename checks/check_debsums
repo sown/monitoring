@@ -1,0 +1,13 @@
+#!/bin/bash
+#This is a quick check to see if binaries have been screwed with
+#Returns nagios ok/critical depending on what the current situation is.
+
+check=`/usr/bin/debsums -s 2>&1 | egrep -vf /etc/debsums-ignore | grep -v "(Permission denied)$" | sed 's/^debsums: //'`
+if [[ -n $check && $check !=  " " ]]; then
+        echo "DEBSUMS check CRITICAL"
+        echo "$check"
+        exit 2;
+else
+        echo "DEBSUMS check OK"
+        exit 0;
+fi

@@ -1,0 +1,40 @@
+#!/bin/bash
+usage() {
+echo "${0} -w [warn] -c [crit]"
+}
+
+if [ "${1}" == "-h" -o "${1}" == "--help" ]; then
+      usage
+      exit 0
+fi
+if [ "${1}" == "-w" ]; then
+      shift
+      warn="${1}"
+      shift
+else
+      usage
+      exit 1
+fi
+if [ "${1}" == "-c" ]; then
+      shift
+      crit="${1}"
+      shift
+else
+      usage
+      exit 1
+fi
+
+
+temp=`/usr/bin/sensors -u | egrep "temp[1-9][0-9]*_input" | awk 'BEGIN{FS=":"}{print $2}' | sed -e 's/^ *//g;s/ *$//g' | awk 'BEGIN{maxtemp=0}{if($1>maxtemp){maxtemp=$1}}END{print maxtemp}' | awk '{printf("%d\n",$1,$1 + 0.5)}'`
+
+if [ "${temp}" -ge "${crit}" ]; then
+      wmsg="CRITICAL"
+elif [ "${temp}" -ge "${warn}" ]; then
+      wmsg="WARN"
+else
+        wmsg="OK"
+fi
+
+smsg="max_temp=${temp}C; "
+
+echo "TEMP ${wmsg} - ${smsg}|temp=${temp};${warn};${crit};0"

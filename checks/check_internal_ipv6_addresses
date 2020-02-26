@@ -1,0 +1,29 @@
+#!/bin/bash
+perf=""
+no_ping=4
+CRITICAL=""
+WARNING=""
+local_name=`echo \`hostname\` | sed 's/^sown-//'`
+for server in `wget -o /dev/null -4 -O - https://sown-auth2.ecs.soton.ac.uk/admin/servers/internal_ipv6_addresses`; do
+	server_name=`echo $server | awk -F , '{print $1}'`
+	if [ "$local_name" != "$server_name" ]; then
+		ipv6=`echo $server | awk -F , '{print $2}'`
+		res=`/bin/ping6 -c $no_ping  $ipv6 | tail -n 2 | head -n 1 | awk -F ' ' '{print $4}'`
+		res=`expr $no_ping - $res`
+		if [ $res -eq $no_ping ]; then
+			CRITICAL="$CRITICAL$server_name,"
+		elif [ $res -eq 1 ]; then
+			WARNING="$WARNING$server_name,"		
+		fi 
+		perf="$perf$server_name=$res;1;$no_ping;0 "
+	fi
+done
+if [ $CRITICAL ]; then
+	echo "CRITICAL: Following hosts not pingable on v6 from this host: $CRITICAL|$perf"
+	exit 2
+elif [ $WARNING ]; then
+	echo "WARNING: Following hosts have packet loss on v6 from this host $WARNING|$perf"
+	exit 1
+fi
+echo "OK: All hosts are pingable without packet loss from this host|$perf"
+exit 0

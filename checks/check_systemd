@@ -1,0 +1,14 @@
+#!/bin/bash
+#This is a quick check to see if all services are running
+
+state=`systemctl is-system-running`
+echo "systemd state $state"
+if [[ $state == "degraded" ]]; then
+	echo "Failed services:"
+	systemctl list-units --failed --plain --no-legend --full | cut -f 1 -d" "
+	exit 2;
+elif [ $state == "running" ]; then
+	exit 0;
+else
+	exit 1;
+fi
