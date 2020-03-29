@@ -41,7 +41,7 @@ then
 	then
 		prefix="Reminder of "
 		middle="still "
-		suffix=" ($NOTIFICATIONUMBER reminders since $LONGDATETIME)"
+		suffix=" ($NOTIFICATIONUMBER reminders since $(date -d @$LONGDATETIME))"
 	else
 		middle="State change $colouredlaststate -> "
 	fi
