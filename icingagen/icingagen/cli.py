@@ -49,6 +49,7 @@ def cli(dry_run: bool, quiet: bool):
             if ip.interface.name not in device.interfaces:
                 device.interfaces[ip.interface.name] = []
             device.interfaces[ip.interface.name].append(ip)
+        device.power_count = len(nb.dcim.power_ports.filter(device_id=device.id))
 
     for root, _, files in os.walk(CONFIG_DIR):
         for name in files:
