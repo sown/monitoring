@@ -43,13 +43,12 @@ def cli(dry_run: bool, quiet: bool):
     vms = nb.virtualization.virtual_machines.filter(status="active")
     racks = nb.dcim.racks.all()
 
+    for vm in vms:
+        vm.ips = nb.ipam.ip_addresses.filter(virtual_machine_id=vm.id)
+
     for device in devices:
-        device.interfaces = {}
-        for ip in nb.ipam.ip_addresses.filter(device_id=device.id):
-            if ip.interface.name not in device.interfaces:
-                device.interfaces[ip.interface.name] = []
-            device.interfaces[ip.interface.name].append(ip)
         device.power_count = len(nb.dcim.power_ports.filter(device_id=device.id))
+        device.ips = nb.ipam.ip_addresses.filter(device_id=device.id)
 
     for root, _, files in os.walk(CONFIG_DIR):
         for name in files:
