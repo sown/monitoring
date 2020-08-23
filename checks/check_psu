@@ -1,0 +1,14 @@
+#!/bin/bash
+EXIT=2
+redundancy=$(sudo /usr/bin/ipmitool -c sdr type "Power Supply" | awk -F, "\$1 == \"PS Redundancy\" {print \$3}")
+if [ "$redundancy" == "ok" ]
+then
+	EXIT=0
+fi
+printf "psu redundancy is $redundancy| "
+(
+	sudo /usr/bin/ipmitool -c sdr type "Voltage" | awk -F, "\$1~/^Voltage/" ;
+	sudo /usr/bin/ipmitool -c sdr type "Current"
+) | awk -F, "{printf \"'\" \$1 \"'\" \"=\" \$2 \" \"}"
+echo
+exit $EXIT
