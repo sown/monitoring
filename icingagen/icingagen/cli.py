@@ -3,7 +3,7 @@ import logging
 import os
 
 import click
-from pynetbox.api import Api
+import pynetbox
 
 from .config import CONFIG_DIR, NETBOX_URL
 from .icinga import Icinga, IcingaReloadFailedException
@@ -32,16 +32,16 @@ def cli(dry_run: bool, quiet: bool):
     """Generate a new Icinga configuration."""
     logger_setup(quiet)
 
-    nb = Api(NETBOX_URL, ssl_verify=False)
+    nb = pynetbox.api(NETBOX_URL)
     icinga = Icinga()
 
     LOGGER.info("Building configuration from netbox")
 
     config = {}
 
-    devices = nb.dcim.devices.filter(status="active")
-    vms = nb.virtualization.virtual_machines.filter(status="active")
-    racks = nb.dcim.racks.all()
+    devices = list(nb.dcim.devices.filter(status="active"))
+    vms = list(nb.virtualization.virtual_machines.filter(status="active"))
+    racks = list(nb.dcim.racks.all())
 
     for vm in vms:
         vm.ips = nb.ipam.ip_addresses.filter(virtual_machine_id=vm.id)
