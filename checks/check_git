@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ ! -f /etc/git-repos ]; then
+	echo "GIT no repos"
+	exit 0
+fi
+for repo in $(cat /etc/git-repos); do
+	if [ $(git -C $repo status --porcelain | wc -l) -ne 0 ]; then
+		echo "Repo $repo has uncommitted changes"
+		exit 1
+	fi
+	if [ $(git -C $repo log @{u}.. | wc -l) -ne 0 ]; then
+		echo "Repo $repo has unpushed changes"
+		exit 1
+	fi
+	if [ $(git -C $repo log ..@{u} | wc -l) -ne 0 ]; then
+		echo "Repo $repo is behind upstream"
+		exit 1
+	fi
+done
+echo "GIT check OK"
+exit 0
