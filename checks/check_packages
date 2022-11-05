@@ -8,7 +8,7 @@ do
         esac
 done
 if [ -f /usr/lib/update-notifier/apt-check ]; then
-        result=`/usr/lib/update-notifier/apt-check --human-readable`
+        result=`/usr/lib/update-notifier/apt-check --human-readable | grep -v '\-\-upgradeable'`
         packages=`echo "$result" | head -n 1 | awk 'BEGIN{FS="[\t ]+"}{print $1}'`
         critpackages=`echo "$result" | tail -n 1 | awk 'BEGIN{FS="[\t ]+"}{print $1}'`
         grep security /etc/apt/sources.list > /tmp/security.list
