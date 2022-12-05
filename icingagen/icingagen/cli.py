@@ -5,7 +5,7 @@ import os
 import click
 import pynetbox
 
-from .config import CONFIG_DIR, NETBOX_URL
+from .config import CONFIG_DIR, NETBOX_URL, NETBOX_TOKEN
 from .icinga import Icinga, IcingaReloadFailedException
 from .logconfig import logger_setup
 from .render import render
@@ -32,7 +32,7 @@ def cli(dry_run: bool, quiet: bool):
     """Generate a new Icinga configuration."""
     logger_setup(quiet)
 
-    nb = pynetbox.api(NETBOX_URL)
+    nb = pynetbox.api(NETBOX_URL, token=NETBOX_TOKEN)
     icinga = Icinga()
 
     LOGGER.info("Building configuration from netbox")
