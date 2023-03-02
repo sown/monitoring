@@ -17,10 +17,10 @@ if [ -f /usr/lib/update-notifier/apt-check ]; then
                 critpkglist=`apt-get dist-upgrade -o Dir::Etc::SourceList=/tmp/security.list -s | grep "^\(Inst\|Remv\)" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
         fi
 else
-        result=`/usr/lib/nagios/plugins/check_apt -d`
+        result=`/usr/lib/nagios/plugins/check_apt -d | grep -v "DepCompareOp"`
         packages=`echo $result | awk 'BEGIN{FS="[\t :()]+"}{print $3}'`
         critpackages=`echo $result | awk 'BEGIN{FS="[\t :()]+"}{print $8}'`
-        critpkglist=`/usr/lib/nagios/plugins/check_apt -d -v | grep "^\*\*" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
+        critpkglist=`/usr/lib/nagios/plugins/check_apt -d -v | grep -v "DepCompareOp" | grep "^\*\*" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
 fi
 regex='^[0-9]+$'
 if ! [[ $critpackages =~ $regex ]] ; then
