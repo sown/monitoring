@@ -8,19 +8,18 @@ do
         esac
 done
 if [ -f /usr/lib/update-notifier/apt-check ]; then
-        result=`/usr/lib/update-notifier/apt-check --human-readable | grep -ve '^$' | grep -v '\-\-upgrade\?able' | grep -v 'Expanded Security Maintenance' | grep -iv 'esm '`
-        packages=`echo "$result" | head -n 1 | awk 'BEGIN{FS="[\t ]+"}{print $1}'`
-        critpackages=0
-        if [ `echo "$result" | tail -n 1 | grep -i security | wc -l` == "1" ]; then
-                critpackages=`echo "$result" | tail -n 1 | grep -i security | awk 'BEGIN{FS="[\t ]+"}{print $1}'`
+        result=`/usr/lib/update-notifier/apt-check 2>&1`
+        packages=`echo "$result" | awk 'BEGIN{FS=";"}{print $1}'`
+        critpackages=`echo "$result" | awk 'BEGIN{FS=";"}{print $2}'`
+        if [[ "$critpackages" != "" && $critpackages > 0 ]]; then
                 grep security /etc/apt/sources.list > /tmp/security.list
                 critpkglist=`apt-get dist-upgrade -o Dir::Etc::SourceList=/tmp/security.list -s | grep "^\(Inst\|Remv\)" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
         fi
 else
-        result=`/usr/lib/nagios/plugins/check_apt -d | grep -v "DepCompareOp"`
+        result=`/usr/lib/nagios/plugins/check_apt -d`
         packages=`echo $result | awk 'BEGIN{FS="[\t :()]+"}{print $3}'`
         critpackages=`echo $result | awk 'BEGIN{FS="[\t :()]+"}{print $8}'`
-        critpkglist=`/usr/lib/nagios/plugins/check_apt -d -v | grep -v "DepCompareOp" | grep "^\*\*" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
+        critpkglist=`/usr/lib/nagios/plugins/check_apt -d -v | grep "^\*\*" | awk 'BEGIN{FS=" "}{print $2}' | tr "\n" " " | head -c -1`
 fi
 regex='^[0-9]+$'
 if ! [[ $critpackages =~ $regex ]] ; then
